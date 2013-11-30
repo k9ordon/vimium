@@ -68,11 +68,31 @@ root.scrollBy = (direction, amount, factor = 1) ->
   amount = getDimension activatedElement, direction, amount if Utils.isString amount
 
   amount *= factor
+  amount = parseInt amount
 
   if (amount != 0)
-    ensureScrollChange direction, (element, axisName) -> element[axisName] += amount
+    console.log 'scrollBy', activatedElement, amount
+
+    ensureScrollChange direction, (element, axisName) -> 
+        smoothAmount = 0
+        clearInterval window.smoothInterval if window.smoothInterval
+
+        window.smoothInterval = setInterval (() -> 
+            console.log 'smoothInterval', smoothAmount, amount, axisName, element[axisName]
+
+            if smoothAmount > amount
+                smoothAmount -= 2
+                element[axisName] -= 2
+            else if smoothAmount < amount
+                smoothAmount += 2
+                element[axisName] += 2
+
+            clearInterval smoothInterval if smoothAmount == amount
+        )
+        ,2
 
 root.scrollTo = (direction, pos) ->
+  console.log 'scrollTo'
   return unless document.body
 
   if (!activatedElement || !isRendered(activatedElement))
